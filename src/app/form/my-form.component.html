@@ -1,0 +1,39 @@
+<mat-card class="wrapper">
+  <mat-toolbar color="primary">10x</mat-toolbar>
+  <mat-tab-group>
+    <mat-tab label="Sign up">
+      <div class="example-container">
+        <mat-form-field>
+          <input matInput placeholder="First Name">
+        </mat-form-field>
+
+        <mat-form-field>
+          <input matInput placeholder="Last Name">
+        </mat-form-field>
+
+        <mat-form-field>
+          <input matInput placeholder="Email">
+        </mat-form-field>
+
+        <button mat-button color="primary">submit</button>
+
+      </div>
+
+    </mat-tab>
+
+    <mat-tab label="Login">
+      <div class="example-container">
+        <mat-form-field>
+          <input matInput placeholder="Email" [(ngModel)]='fName'>
+        </mat-form-field>
+
+        <mat-form-field>
+          <input type="password" matInput placeholder="Password" [(ngModel)]='pwd'>
+        </mat-form-field>
+
+        <button mat-button color="primary" (click)='onSubmit()'>submit</button>
+
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</mat-card>
