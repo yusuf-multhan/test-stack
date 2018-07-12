@@ -19,17 +19,10 @@ let response = {
 
 // Get users
 router.get('/exchangelist', (req, res) => {
-    mongoose.connection.db.collection('exchangeList', (e, collection) => {
-        if(e) return sendError(e, res);
-        collection.find()
-                    .toArray()
-                    .then(list => {
-                        response.data = list;
-                        res.json(response); 
-                    })
-                    .catch((e) => {
-                        sendError(err, res);
-                    })
+    db.getExchangeList((err, list) => {
+        if(err) return sendError(e, res);
+        response.data = list;
+        res.json(response); 
     })
 });
 

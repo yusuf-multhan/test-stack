@@ -1,5 +1,6 @@
+require('../schemas/AltexSchema.js');
 const mongoose = require('mongoose');
-// const schedule = 
+const scheduler = require('./scheduler.js');
 
 const dbURI = 'mongodb+srv://upwork:J1JrywiF0MCe@cluster0-hufaj.mongodb.net/"';
 mongoose.connect(dbURI, { dbName: '10x', useNewUrlParser: true });
@@ -7,6 +8,10 @@ mongoose.connect(dbURI, { dbName: '10x', useNewUrlParser: true });
 // CONNECTION EVENTS
 mongoose.connection.on('connected', function () {
     console.log('Mongoose connected to ' + dbURI);
+    getExchangeList((e, list) => {
+        if(e) return console.log('Error while scheduling ' + e.message);
+        scheduler.initializeScheduling(list);
+    });
 });
 mongoose.connection.on('error', function (err) {
     console.log('Mongoose connection error: ' + err);
@@ -35,3 +40,21 @@ process.on('SIGTERM', function () {
         process.exit(0);
     });
 });
+
+
+
+const getExchangeList = (cb) => {
+    mongoose.connection.db.collection('exchangeList', (e, collection) => {
+        if(e) return cb(err);
+        collection.find()
+            .toArray()
+            .then(list => {
+                cb(null, list);
+            })
+            .catch((e) => {
+                cb(e);
+            })
+    })
+}
+
+exports.getExchangeList = getExchangeList;
