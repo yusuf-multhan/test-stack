@@ -1,8 +1,9 @@
-require('../schemas/AltexSchema.js');
+require('../schemas/ExchangeSchema.js');
 const mongoose = require('mongoose');
 const scheduler = require('./scheduler.js');
+const utils = require('./utils');
 
-const dbURI = 'mongodb+srv://upwork:J1JrywiF0MCe@cluster0-hufaj.mongodb.net/"';
+const dbURI = 'mongodb://localhost:27017/';
 mongoose.connect(dbURI, { dbName: '10x', useNewUrlParser: true });
 
 // CONNECTION EVENTS
@@ -58,3 +59,25 @@ const getExchangeList = (cb) => {
 }
 
 exports.getExchangeList = getExchangeList;
+
+const updateFrequency = (opt, cb) => {
+    mongoose.connection.db.collection('exchangeList', (e, collection) => {
+        collection.updateOne
+        collection.update({ name : opt.exchangeName}, { $set : { frequency : opt.reqBody.frequency }}, (e, res) => {
+            if(e) return cb(e);
+            cb(null, true);
+        })
+    })
+}
+
+exports.updateFrequency = updateFrequency;
+
+const getExchangeData = (opt, cb) => {
+    let Model = mongoose.model(utils.exchangeSchemaMapping(opt.exchangeName));
+    Model.find((err, res) => {
+        if(err) return cb(err);
+        cb(null, res)
+    })
+}
+
+exports.getExchangeData = getExchangeData;

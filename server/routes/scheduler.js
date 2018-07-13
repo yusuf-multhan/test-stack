@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const schedule = require('node-schedule');
 const _ = require('lodash');
-const https = require('https');
+const requestHelper = require('./requestHelper');
+const utils = require('./utils');
 
 const AltexSchema = mongoose.model('AltexSchema');
 
@@ -9,9 +10,7 @@ const AltexSchema = mongoose.model('AltexSchema');
 const initializeScheduling = (list) => {
     if (!_.isEmpty(list)) {
         _.forEach(list, (v) => {
-            if (v.name === 'altex') {
-                scheduleJob(v);
-            }
+            // scheduleJob(v);
         })
     } else {
         console.log('Nothing to schedule');
@@ -21,45 +20,47 @@ const initializeScheduling = (list) => {
 exports.initializeScheduling = initializeScheduling;
 
 function scheduleJob(exObj) {
-    let f = Number(exObj.frequency);
-    setCollection(exObj);
-    schedule.scheduleJob('* * ' + f + ' * * *', function () {
-        console.log('job ran');
-        setCollection(exObj);
-    })
+    let c=0;
+    let cronJob = 'm h * * *';
+    setCollection(exObj); // Default fetch on server start.
+    if(exObj.frequency) {
+        let f = exObj.frequency;
+        let h = f.indexOf('h') > -1 ? f.substring(f.indexOf('h') -2, f.indexOf('h')) : '';
+        let m = f.indexOf('m') > -1 ? f.substring(f.indexOf('h') > -1 ? f.indexOf('h') + 1 : f.indexOf('m') -2 , f.indexOf('m')) : '';
+        cronJob = h ? cronJob.replace('h', '*/' + h) : cronJob.replace('h', '*');
+        cronJob = m ? cronJob.replace('m', '*/' + m) : cronJob.replace('m', '0D');
+        if(h || m) {
+            schedule.scheduleJob(cronJob, () => {
+                // setCollection(exObj);
+            })
+        }
+    }
+}
+
+function exchangeIteration(exObj, res) {
+    switch(exObj.name.toLowerCase()) {
+        case 'altex' : return utils.altexIteration(exObj, res);
+        break;
+        case 'hitbtc' : return utils.hitbtcIteration(exObj, res);
+        break;
+        // case 'tradeogre' : return utils.tradeogreIteration(exObj, res);
+        // break;
+        // case 'tradesatoshi' : return utils.tradesatoshiIteration(exObj, res);
+        // break;
+        // case 'crex24' : return utils.crex24Iteration(exObj, res);
+        // break;
+        // case 'cryptopia' : return utils.cryptopiaIteration(exObj, res);
+        // break;
+        // case 'binance' : return utils.binanceIteration(exObj, res);
+        // break;
+    }
 }
 
 function setCollection(exObj) {
-    let data = '';
-    https.get(exObj.apiUrl, (res) => {
-        
-        res.on('data', (d) => {
-            data += d;
-        });
-
-        res.on('end', ()=> {
-            data = JSON.parse(data);
-            if (data && data.success == true && data.data) {
-                let list = Object.keys(data.data);
-                let arrDoc = _.map(list, (v) => {
-                    return {
-                        symbol: v,
-                        volume: data.data[v]['volume'],
-                        last: data.data[v]['last'],
-                        bid: data.data[v]['bid'],
-                        ask: data.data[v]['ask'],
-                        high: data.data[v]['high24'],
-                        low: data.data[v]['low24']
-                    }
-                })
-                AltexSchema.insertMany(arrDoc, function (err, mongooseDoc) {
-                    if (err) return console.log('Error while insert ' + err.message);
-                    console.log(mongooseDoc.status);
-                })
-            }
-        })
-
-    }).on('error', (e) => {
-        console.log('Error while fetching data ' + err.message);
+    requestHelper.makeCall({method : 'GET', url : exObj.apiUrl}, (err, res)=> {
+        if(err) {
+            return console.log('Unable to get Exchange data from ' + exObj.name);
+        }
+        exchangeIteration(exObj, res);
     });
 }
