@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthenticationService, User } from '../authentication.service';
 
 @Component({
   selector: 'my-form',
@@ -8,21 +9,23 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class MyFormComponent implements OnInit {
 
-  fName: string;
-  pwd: string;
+  credentials: User = {
+    email: '',
+    password: ''
+  };
 
-  constructor(private _route: ActivatedRoute,
+  constructor(private auth: AuthenticationService,private _route: ActivatedRoute,
     private _router: Router) { }
 
   ngOnInit() {
   }
 
   onSubmit(): void {
-    if(this.fName.toLocaleLowerCase()=='mustafa')
-    this._router.navigate(['/home'])
-    else{
-      alert('invalid!')
-    }
+    this.auth.login(this.credentials).subscribe(() => {      
+      this._router.navigate(['/home']);
+    }, (err) => {
+      console.error(err);
+    }); 
   }
 
 }

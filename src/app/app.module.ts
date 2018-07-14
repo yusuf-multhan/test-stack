@@ -2,6 +2,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+//import { HttpClient } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { MaterialModule } from './shared/material.module';
@@ -10,6 +12,7 @@ import { MyFormComponent } from './form/my-form.component';
 import { HomeComponent } from './home/home.component';
 import { ScheduleComponent } from './home/schedule.component';
 import { ChartsComponent } from './home/charts.component';
+import {AuthenticationService} from './authentication.service';
 
 @NgModule({
   declarations: [
@@ -23,6 +26,8 @@ import { ChartsComponent } from './home/charts.component';
     BrowserModule,
     BrowserAnimationsModule,
     MaterialModule,
+    HttpClientModule,
+   // HttpClient,
     RouterModule.forRoot([
       { path: 'login', component: MyFormComponent },
       { path: 'home', component: HomeComponent},
@@ -31,7 +36,7 @@ import { ChartsComponent } from './home/charts.component';
   ]),
     FormsModule
   ],
-  providers: [],
+  providers: [AuthenticationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
