@@ -1,4 +1,5 @@
 require('../schemas/ExchangeSchema.js');
+require('../schemas/UserSchema.js');
 const mongoose = require('mongoose');
 const scheduler = require('./scheduler.js');
 const utils = require('./utils');

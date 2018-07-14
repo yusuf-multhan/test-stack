@@ -64,3 +64,4 @@ typings/
 .next
 package-lock.json
 .vscode/launch.json
+adminUtils.js
