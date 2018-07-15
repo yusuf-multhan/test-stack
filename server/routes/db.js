@@ -74,8 +74,25 @@ const updateFrequency = (opt, cb) => {
 exports.updateFrequency = updateFrequency;
 
 const getExchangeData = (opt, cb) => {
+    let filter = {}, to, from;
+    if(opt.qs) {
+        if(opt.qs.range) {
+            let a = opt.qs.range.split('-');
+            from = a[0], to = a[1];
+            filter.createdTimestamp = {
+                "$gte" : from,
+                "$lte" : to
+            }
+        }
+        if(opt.qs.cur) [
+            filter.symbol = {
+                "$regex" : opt.qs.cur
+            }
+        ]
+    }
+    
     let Model = mongoose.model(utils.exchangeSchemaMapping(opt.exchangeName));
-    Model.find((err, res) => {
+    Model.find(filter, (err, res) => {
         if(err) return cb(err);
         cb(null, res)
     })

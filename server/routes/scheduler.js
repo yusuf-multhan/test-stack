@@ -45,14 +45,14 @@ function exchangeIteration(exObj, res) {
         break;
         // case 'tradeogre' : return utils.tradeogreIteration(exObj, res);
         // break;
-        // case 'tradesatoshi' : return utils.tradesatoshiIteration(exObj, res);
-        // break;
-        // case 'crex24' : return utils.crex24Iteration(exObj, res);
-        // break;
-        // case 'cryptopia' : return utils.cryptopiaIteration(exObj, res);
-        // break;
-        // case 'binance' : return utils.binanceIteration(exObj, res);
-        // break;
+        case 'tradesatoshi' : return utils.tradesatoshiIteration(exObj, res);
+        break;
+        case 'crex24' : return utils.crex24Iteration(exObj, res);
+        break;
+        case 'cryptopia' : return utils.cryptopiaIteration(exObj, res);
+        break;
+        case 'binance' : return utils.binanceIteration(exObj, res);
+        break;
     }
 }
 

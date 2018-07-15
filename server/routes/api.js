@@ -92,15 +92,16 @@ router.put('/exchangelist/frequency/:exchangeName', (req, res) => {
 
 router.get('/exchange/:exchangeName', (req, res) => {
     let exchangeName = req.params.exchangeName && req.params.exchangeName.toLowerCase() || '';
+    let qs = req.query;
     if (!exchangeName) return sendError(new Error('Mandatory exchange name param required'), res);
 
-    db.getExchangeData({ exchangeName }, (err, exchangeResponse) => {
+    db.getExchangeData({ exchangeName, qs }, (err, exchangeResponse) => {
         let response = {
             status: 200,
             data: {},
             message: 'OK'
         };
-        if (err) return sendError(e, res);
+        if (err) return sendError(err, res);
         response.data = exchangeResponse;
         res.json(response);
     })

@@ -23,10 +23,17 @@ const getDefaultSchema = () => {
         low: {
             type: String
         },
-        currentTimestamp : {type : Date, default : Date.now()}
+        change : {
+            type: String
+        },
+        createdTimestamp : {type : Date, default : Date.now()}
     });
 }
 
 
 mongoose.model('AltexSchema', getDefaultSchema(), 'altex');
 mongoose.model('HitBTCSchema', getDefaultSchema(), 'hitbtc');
+mongoose.model('TradesatoshiSchema', getDefaultSchema(), 'tradesatoshi');
+mongoose.model('Crex24Schema', getDefaultSchema(), 'crex24');
+mongoose.model('CryptopiaSchema', getDefaultSchema(), 'cryptopia');
+mongoose.model('BinanceSchema', getDefaultSchema(), 'binance');
