@@ -17,6 +17,7 @@ const User = mongoose.model('User');
 
 // Error handling
 const sendError = (err, res) => {
+    let response = {};
     response.status = 501;
     response.message = typeof err == 'object' ? err.message : err;
     res.status(501).json(response);

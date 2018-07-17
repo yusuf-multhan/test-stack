@@ -78,22 +78,21 @@ const getExchangeData = (opt, cb) => {
     if(opt.qs) {
         if(opt.qs.range) {
             let a = opt.qs.range.split('-');
-            from = a[0], to = a[1];
+            from = new Date(Number(a[0])), to = new Date(Number(a[1]));
             filter.createdTimestamp = {
-                "$gte" : from,
-                "$lte" : to
+                "$lte" : to,
+                "$gt" : from
             }
+            // filter.createdTimestamp = new Date(2018, 6, 17);
         }
-        if(opt.qs.cur) [
-            filter.symbol = {
-                "$regex" : opt.qs.cur
-            }
-        ]
+        if(opt.qs.cur) {
+            filter.symbol = new RegExp(opt.qs.cur, 'i');
+        }
     }
     
     let Model = mongoose.model(utils.exchangeSchemaMapping(opt.exchangeName));
     Model.find(filter, (err, res) => {
-        if(err) return cb(err);
+        if(err) return cb(err, res);
         cb(null, res)
     })
 }

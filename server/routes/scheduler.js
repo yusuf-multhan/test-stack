@@ -10,7 +10,7 @@ const AltexSchema = mongoose.model('AltexSchema');
 const initializeScheduling = (list) => {
     if (!_.isEmpty(list)) {
         _.forEach(list, (v) => {
-            // scheduleJob(v);
+            scheduleJob(v);
         })
     } else {
         console.log('Nothing to schedule');
@@ -20,9 +20,8 @@ const initializeScheduling = (list) => {
 exports.initializeScheduling = initializeScheduling;
 
 function scheduleJob(exObj) {
-    let c=0;
     let cronJob = 'm h * * *';
-    setCollection(exObj); // Default fetch on server start.
+    setCollection(exObj, 0); // Default fetch on server start.
     if(exObj.frequency) {
         let f = exObj.frequency;
         let h = f.indexOf('h') > -1 ? f.substring(f.indexOf('h') -2, f.indexOf('h')) : '';
@@ -43,8 +42,8 @@ function exchangeIteration(exObj, res) {
         break;
         case 'hitbtc' : return utils.hitbtcIteration(exObj, res);
         break;
-        // case 'tradeogre' : return utils.tradeogreIteration(exObj, res);
-        // break;
+        case 'tradeogre' : return utils.tradeogreIteration(exObj, res);
+        break;
         case 'tradesatoshi' : return utils.tradesatoshiIteration(exObj, res);
         break;
         case 'crex24' : return utils.crex24Iteration(exObj, res);
@@ -56,10 +55,11 @@ function exchangeIteration(exObj, res) {
     }
 }
 
-function setCollection(exObj) {
+function setCollection(exObj, counter) {
+    console.log('setCollection called', exObj.name, counter);
     requestHelper.makeCall({method : 'GET', url : exObj.apiUrl}, (err, res)=> {
         if(err) {
-            return console.log('Unable to get Exchange data from ' + exObj.name);
+            return (++counter < 3) ? setCollection(exObj, counter) : console.log('After ' + counter + ' ssssssstries Unable to get Exchange data from ' + exObj.name + err.message);
         }
         exchangeIteration(exObj, res);
     });

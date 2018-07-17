@@ -48,3 +48,26 @@ process.on('uncaughtException', (e) => {
 const server = http.createServer(app);
 
 server.listen(port, () => console.log(`Running on localhost:${port}`));
+
+// Adding polyfill for noExponents function
+(function () {
+    if(!Number.prototype.noExponents) {
+        Number.prototype.noExponents= function(){
+            var data= String(this).split(/[eE]/);
+            if(data.length== 1) return data[0]; 
+        
+            var  z= '', sign= this<0? '-':'',
+            str= data[0].replace('.', ''),
+            mag= Number(data[1])+ 1;
+        
+            if(mag<0){
+                z= sign + '0.';
+                while(mag++) z += '0';
+                return z + str.replace(/^\-/,'');
+            }
+            mag -= str.length;  
+            while(mag--) z += '0';
+            return str + z;
+        }
+    }
+})()

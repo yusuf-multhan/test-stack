@@ -33,6 +33,7 @@ const getDefaultSchema = () => {
 
 mongoose.model('AltexSchema', getDefaultSchema(), 'altex');
 mongoose.model('HitBTCSchema', getDefaultSchema(), 'hitbtc');
+mongoose.model('TradeogreSchema', getDefaultSchema(), 'tradeogre');
 mongoose.model('TradesatoshiSchema', getDefaultSchema(), 'tradesatoshi');
 mongoose.model('Crex24Schema', getDefaultSchema(), 'crex24');
 mongoose.model('CryptopiaSchema', getDefaultSchema(), 'cryptopia');
