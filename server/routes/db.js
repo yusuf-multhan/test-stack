@@ -63,7 +63,7 @@ exports.getExchangeList = getExchangeList;
 
 const updateFrequency = (opt, cb) => {
     mongoose.connection.db.collection('exchangeList', (e, collection) => {
-        collection.updateOne
+        // collection.updateOne
         collection.update({ name : opt.exchangeName}, { $set : { frequency : opt.reqBody.frequency }}, (e, res) => {
             if(e) return cb(e);
             cb(null, true);
