@@ -1,18 +1,26 @@
-require('../schemas/ExchangeSchema.js');
 require('../schemas/UserSchema.js');
+require('../schemas/MaterialSchema.js');
+require('../schemas/VariantSchema.js');
+require('../schemas/InventorySchema.js');
+require('../schemas/OrderSchema.js');
+require('../schemas/SequenceCounter.js');
+
 const mongoose = require('mongoose');
-const scheduler = require('./scheduler.js');
-const utils = require('./utils');
+const utils = require('./utils.js');
 
 const dbURI = 'mongodb://localhost:27017/';
-mongoose.connect(dbURI, { dbName: '10x', useNewUrlParser: true });
+mongoose.connect(dbURI, { dbName: 'gr-inventory', useNewUrlParser: true });
 
 // CONNECTION EVENTS
 mongoose.connection.on('connected', function () {
     console.log('Mongoose connected to ' + dbURI);
-    getExchangeList((e, list) => {
-        if(e) return console.log('Error while scheduling ' + e.message);
-        scheduler.initializeScheduling(list);
+    const SeqCounter = mongoose.model('SequenceCounter');
+    const result = SeqCounter.findById('orderCounter', (err, row) => {
+        if (!row) {
+            SeqCounter.update({_id: 'orderCounter'},{seqValue: 0}, {upsert: true}, (err, update) => {
+                console.log(err, update);
+            });
+        };
     });
 });
 mongoose.connection.on('error', function (err) {
@@ -43,35 +51,26 @@ process.on('SIGTERM', function () {
     });
 });
 
-
-
-const getExchangeList = (cb) => {
-    mongoose.connection.db.collection('exchangeList', (e, collection) => {
-        if(e) return cb(err);
-        collection.find()
-            .toArray()
-            .then(list => {
-                cb(null, list);
-            })
-            .catch((e) => {
-                cb(e);
-            })
-    })
+function getValueForNextSeq (seqName) {
+    const seqDoc = OrderSchema.findByIdAndUpdate(
+        seqName,
+        {$inc:{seqValue:1}},
+        {new: true}
+    );
+    return seqDoc.seqValue
 }
 
-exports.getExchangeList = getExchangeList;
-
-const updateFrequency = (opt, cb) => {
-    mongoose.connection.db.collection('exchangeList', (e, collection) => {
-        // collection.updateOne
-        collection.update({ name : opt.exchangeName}, { $set : { frequency : opt.reqBody.frequency }}, (e, res) => {
-            if(e) return cb(e);
-            cb(null, true);
-        })
-    })
+const getResources = (requestResource, cb) => {
+    const ResourceModel = mongoose.model(utils.mapSchema(requestResource));
+    ResourceModel.find((err, results) => {
+        if (err) console.log(err);
+        if(results) {
+            cb(null, results.map(i => {return i.name}));
+        }
+    });
 }
 
-exports.updateFrequency = updateFrequency;
+exports.getResources = getResources;
 
 const getExchangeData = (opt, cb) => {
     let filter = {}, to, from;
@@ -89,12 +88,10 @@ const getExchangeData = (opt, cb) => {
             filter.symbol = new RegExp(opt.qs.cur, 'i');
         }
     }
-    
+
     let Model = mongoose.model(utils.exchangeSchemaMapping(opt.exchangeName));
     Model.find(filter, (err, res) => {
         if(err) return cb(err, res);
         cb(null, res)
     })
 }
-
-exports.getExchangeData = getExchangeData;

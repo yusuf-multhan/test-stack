@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db.js');
 const mongoose = require('mongoose');
-const utils = require('./utils.js');
+const utils = {};
 const config = require('../config/default.json');
 const jwt = require('express-jwt');
 const passport = require('passport');
@@ -63,49 +63,22 @@ router.get('/profile', auth, (req, res) => {
                 res.status(200).json(user);
             });
     }
-})
-
-// Get users
-router.get('/exchangelist', (req, res) => {
-    db.getExchangeList((err, list) => {
-        if (err) return sendError(e, res);
-        // Response handling
-        let response = {
-            status: 200,
-            data: [],
-            message: 'OK'
-        };
-        response.data = utils.exchangeApiList(list);
-        res.json(response);
-    })
 });
 
-router.put('/exchangelist/frequency/:exchangeName', (req, res) => {
-    let exchangeName = req.params.exchangeName && req.params.exchangeName.toLowerCase();
-    let reqBody = req.body;
-    db.updateFrequency({ exchangeName, reqBody }, (e, status) => {
-        if (e) return sendError(e, res);
-        res.json({
-            status: 'OK'
-        })
-    })
-});
-
-router.get('/exchange/:exchangeName', (req, res) => {
-    let exchangeName = req.params.exchangeName && req.params.exchangeName.toLowerCase() || '';
-    let qs = req.query;
-    if (!exchangeName) return sendError(new Error('Mandatory exchange name param required'), res);
-
-    db.getExchangeData({ exchangeName, qs }, (err, exchangeResponse) => {
-        let response = {
-            status: 200,
-            data: {},
-            message: 'OK'
-        };
-        if (err) return sendError(err, res);
-        response.data = exchangeResponse;
-        res.json(response);
-    })
+router.get('/resources', (req, res) => {
+    const requestResource = req.query.identifier;
+    if (!requestResource) {
+        res.status(400).json({message: 'Bad Request'})
+    } else {
+        db.getResources(requestResource, (err, results) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json({message: err.message});
+            } else {
+                res.status(200).json(results);
+            }
+        });
+    }
 })
 
 module.exports = router;
