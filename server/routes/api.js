@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db.js');
 const mongoose = require('mongoose');
-const utils = {};
 const config = require('../config/default.json');
 const jwt = require('express-jwt');
 const passport = require('passport');
@@ -10,7 +9,6 @@ const auth = jwt({
     secret: config.secretKey,
     userProperty: 'payload'
 });
-
 
 // User Schema
 const User = mongoose.model('User');
@@ -57,15 +55,23 @@ router.get('/profile', auth, (req, res) => {
             "message": "UnauthorizedError: private profile"
         });
     } else {
-        User
-            .findById(req.payload._id)
+        User.findById(req.payload._id)
             .exec(function (err, user) {
-                res.status(200).json(user);
+                res.status(200).json({
+                    email: user.email,
+                    name: user.name,
+                    role: user.role
+                });
             });
     }
 });
 
-router.get('/resources', (req, res) => {
+router.get('/resources', auth, (req, res) => {
+    if (!req.payload._id) {
+        res.status(401).json({
+            "message": "UnauthorizedError: private profile"
+        });
+    }
     const requestResource = req.query.identifier;
     if (!requestResource) {
         res.status(400).json({message: 'Bad Request'})
@@ -79,6 +85,6 @@ router.get('/resources', (req, res) => {
             }
         });
     }
-})
+});
 
 module.exports = router;
